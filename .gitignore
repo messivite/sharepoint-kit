@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.sharepoint-cache.json
+*.tsbuildinfo
+.DS_Store
+
+# Env files (secrets – do not commit)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test

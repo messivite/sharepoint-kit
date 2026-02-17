@@ -1,0 +1,123 @@
+{
+  "name": "@mustafaaksoy/sharepoint-kit",
+  "version": "0.1.0",
+  "description": "Full-featured SharePoint Graph API client, React hooks, Radix UI components, and CLI type generator for TypeScript projects",
+  "author": "Mustafa Aksoy",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "sp-generate-types": "./dist/bin/sp-generate-types.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./hooks": {
+      "import": {
+        "types": "./dist/hooks/index.d.ts",
+        "default": "./dist/hooks/index.js"
+      },
+      "require": {
+        "types": "./dist/hooks/index.d.cts",
+        "default": "./dist/hooks/index.cjs"
+      }
+    },
+    "./components": {
+      "import": {
+        "types": "./dist/components/index.d.ts",
+        "default": "./dist/components/index.js"
+      },
+      "require": {
+        "types": "./dist/components/index.d.cts",
+        "default": "./dist/components/index.cjs"
+      }
+    },
+    "./cli": {
+      "import": {
+        "types": "./dist/cli/index.d.ts",
+        "default": "./dist/cli/index.js"
+      },
+      "require": {
+        "types": "./dist/cli/index.d.cts",
+        "default": "./dist/cli/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^3.28.0",
+    "@azure/msal-node": "^2.16.2",
+    "commander": "^12.1.0",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@radix-ui/react-icons": "^1.3.2",
+    "@radix-ui/themes": "^3.1.6",
+    "@testing-library/react": "^16.1.0",
+    "@types/prompts": "^2.4.9",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "jsdom": "^25.0.1",
+    "msw": "^2.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "swr": "^2.3.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-icons": ">=1.3.0",
+    "@radix-ui/themes": ">=3.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "swr": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@radix-ui/themes": {
+      "optional": true
+    },
+    "@radix-ui/react-icons": {
+      "optional": true
+    },
+    "swr": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "sharepoint",
+    "microsoft-graph",
+    "graph-api",
+    "react",
+    "hooks",
+    "radix-ui",
+    "typescript",
+    "cli",
+    "codegen"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mustafaaksoy/sharepoint-kit"
+  }
+}
