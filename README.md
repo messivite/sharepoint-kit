@@ -1,4 +1,4 @@
-# @mustafaaksoy/sharepoint-kit
+# @mustafaaksoy41/sharepoint-kit
 
 Full-featured SharePoint Graph API client, React hooks, Radix UI components, and CLI type generator for TypeScript projects. Supports Next.js App Router and Pages Router.
 
@@ -13,7 +13,7 @@ Full-featured SharePoint Graph API client, React hooks, Radix UI components, and
 ## Installation
 
 ```bash
-npm install @mustafaaksoy/sharepoint-kit
+npm install @mustafaaksoy41/sharepoint-kit
 ```
 
 ### Peer Dependencies
@@ -77,7 +77,7 @@ export interface Document {
 ### 2. Use the Data Client
 
 ```typescript
-import { createSpClient } from '@mustafaaksoy/sharepoint-kit';
+import { createSpClient } from '@mustafaaksoy41/sharepoint-kit';
 import type { Invoice } from './generated/sp-types';
 
 const client = createSpClient({
@@ -100,8 +100,8 @@ await client.deleteItem({ listId: '...', itemId: '6' });
 ### 3. Use React Hooks
 
 ```tsx
-import { SpProvider } from '@mustafaaksoy/sharepoint-kit/components';
-import { useSpList, useSpItem, useSpCreate } from '@mustafaaksoy/sharepoint-kit/hooks';
+import { SpProvider } from '@mustafaaksoy41/sharepoint-kit/components';
+import { useSpList, useSpItem, useSpCreate } from '@mustafaaksoy41/sharepoint-kit/hooks';
 import type { Invoice } from './generated/sp-types';
 
 // Wrap your app
@@ -135,7 +135,7 @@ function InvoiceList() {
 ### 4. Use Radix UI Components
 
 ```tsx
-import { SpProvider, SpListTable, SpItemForm, SpErrorBoundary } from '@mustafaaksoy/sharepoint-kit/components';
+import { SpProvider, SpListTable, SpItemForm, SpErrorBoundary } from '@mustafaaksoy41/sharepoint-kit/components';
 import type { Invoice } from './generated/sp-types';
 
 function App() {
@@ -176,7 +176,7 @@ In Azure AD: App Registration → Authentication → add **SPA** with this Redir
 Wrap your app with `SpAuthProvider` + `loginConfig`:
 
 ```tsx
-import { SpAuthProvider, SpProviderWithAuth, type SpLoginConfig } from '@mustafaaksoy/sharepoint-kit/components';
+import { SpAuthProvider, SpProviderWithAuth, type SpLoginConfig } from '@mustafaaksoy41/sharepoint-kit/components';
 import { Theme } from '@radix-ui/themes';
 
 const loginConfig: SpLoginConfig = {
@@ -256,7 +256,7 @@ npx sp-generate-types --config sharepoint.config.ts --clear-cache
 ## Error Handling
 
 ```typescript
-import { SpError, SpAuthError, SpNotFoundError, SpThrottleError, SpValidationError } from '@mustafaaksoy/sharepoint-kit';
+import { SpError, SpAuthError, SpNotFoundError, SpThrottleError, SpValidationError } from '@mustafaaksoy41/sharepoint-kit';
 
 try {
   await client.getItem({ listId, itemId: '999' });

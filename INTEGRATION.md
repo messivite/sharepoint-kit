@@ -11,14 +11,14 @@ npm link
 
 # Projenizde
 cd /path/to/your/project
-npm link @mustafaaksoy/sharepoint-kit
+npm link @mustafaaksoy41/sharepoint-kit
 ```
 
 ### veya npm publish sonrası
 
 ```bash
 cd /path/to/your/project
-npm install @mustafaaksoy/sharepoint-kit
+npm install @mustafaaksoy41/sharepoint-kit
 ```
 
 ## 2. Environment Variables (.env)
@@ -60,7 +60,7 @@ npx sp-generate-types --config sharepoint.config.ts
 Uygulama açılışında "Sign in with Microsoft" ekranı çıkar; giriş sonrası token otomatik kullanılır.
 
 ```tsx
-import { SpAuthProvider, SpProviderWithAuth, SpListTable, type SpLoginConfig } from '@mustafaaksoy/sharepoint-kit/components';
+import { SpAuthProvider, SpProviderWithAuth, SpListTable, type SpLoginConfig } from '@mustafaaksoy41/sharepoint-kit/components';
 import { Theme } from '@radix-ui/themes';
 import type { Invoice } from './generated/sp-types';
 
@@ -93,7 +93,7 @@ function App() {
 ### Kendi auth sisteminizle (SpProvider + getAccessToken)
 
 ```tsx
-import { SpProvider, SpListTable } from '@mustafaaksoy/sharepoint-kit/components';
+import { SpProvider, SpListTable } from '@mustafaaksoy41/sharepoint-kit/components';
 import { useSession } from 'next-auth/react'; // veya kendi auth
 import type { Invoice } from './generated/sp-types';
 
@@ -123,7 +123,7 @@ function MySharePointComponent() {
 ### Server-side API Route Örneği
 
 ```typescript
-import { createSpClient } from '@mustafaaksoy/sharepoint-kit';
+import { createSpClient } from '@mustafaaksoy41/sharepoint-kit';
 import type { Invoice } from '@/generated/sp-types';
 
 export async function GET() {

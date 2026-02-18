@@ -11,7 +11,7 @@ describe('templates', () => {
     it('should include auto-generated comment', () => {
       const header = generateFileHeader();
       expect(header).toContain('Auto-generated');
-      expect(header).toContain('@mustafaaksoy/sharepoint-kit');
+      expect(header).toContain('@mustafaaksoy41/sharepoint-kit');
     });
   });
 
