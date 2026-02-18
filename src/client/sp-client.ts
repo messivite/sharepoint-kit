@@ -47,7 +47,7 @@ interface SpClient {
   getList(options: { listId: string }): Promise<SpList>;
   getContentTypes(options?: { listId?: string }): Promise<SpContentType[]>;
   getListContentTypes(options: { listId: string }): Promise<SpContentType[]>;
-  getColumns(options: { contentTypeId: string }): Promise<SpColumn[]>;
+  getColumns(options: { contentTypeId: string; listId?: string }): Promise<SpColumn[]>;
   getListColumns(options: { listId: string }): Promise<SpColumn[]>;
 }
 
@@ -242,8 +242,11 @@ export function createSpClient(config: SpClientConfig): SpClient {
       return response.value;
     },
 
-    async getColumns(options: { contentTypeId: string }): Promise<SpColumn[]> {
-      const url = buildGraphUrl(siteId, 'contentTypes', options.contentTypeId, 'columns');
+    async getColumns(options: { contentTypeId: string; listId?: string }): Promise<SpColumn[]> {
+      const { contentTypeId, listId } = options;
+      const url = listId
+        ? buildGraphUrl(siteId, 'lists', listId, 'contentTypes', contentTypeId, 'columns')
+        : buildGraphUrl(siteId, 'contentTypes', contentTypeId, 'columns');
       const response = await request<{ value: SpColumn[] }>(url);
       return response.value;
     },

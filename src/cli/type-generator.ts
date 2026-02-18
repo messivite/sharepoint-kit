@@ -2,7 +2,7 @@ import type { SpColumn } from '../client/types.js';
 import { generateFileHeader, generateInterface, mapSharePointTypeToTs, sanitizeInterfaceName } from './templates.js';
 
 interface GraphClient {
-  getColumns(options: { contentTypeId: string }): Promise<SpColumn[]>;
+  getColumns(options: { contentTypeId: string; listId?: string }): Promise<SpColumn[]>;
   getListColumns(options: { listId: string }): Promise<SpColumn[]>;
   getContentTypes(options?: { listId?: string }): Promise<Array<{ id: string; name: string }>>;
   getListContentTypes(options: { listId: string }): Promise<Array<{ id: string; name: string }>>;
@@ -36,9 +36,17 @@ export async function generateTypeScript(
     let columns: SpColumn[];
 
     if (contentType) {
-      columns = await graphClient.getColumns({ contentTypeId: contentType.id });
+      try {
+        columns = await graphClient.getColumns({
+          contentTypeId: contentType.id,
+          listId: input.listId,
+        });
+      } catch {
+        console.log(`    Content type columns API failed, falling back to list columns`);
+        columns = await graphClient.getListColumns({ listId: input.listId });
+      }
     } else {
-      console.log(`    Content type not found by ID, falling back to list columns`);
+      console.log(`    Content type not found, falling back to list columns`);
       columns = await graphClient.getListColumns({ listId: input.listId });
     }
 
