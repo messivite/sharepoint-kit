@@ -1,6 +1,6 @@
 {
   "name": "@mustafaaksoy41/sharepoint-kit",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Full-featured SharePoint Graph API client, React hooks, Radix UI components, and CLI type generator for TypeScript projects",
   "author": "Mustafa Aksoy",
   "license": "MIT",
