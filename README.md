@@ -16,34 +16,34 @@
 <h1 align="center">SharePoint Kit</h1>
 
 <p align="center">
-  <strong>TypeScript-first SharePoint geliştirme araç seti</strong>
+  <strong>TypeScript-first SharePoint development toolkit</strong>
 </p>
 
 <p align="center">
-  Microsoft Graph API client, React hooks, Radix UI bileşenleri ve CLI type generator. Next.js App Router ve Pages Router ile uyumlu.
+  Microsoft Graph API client, React hooks, Radix UI components, and CLI type generator. Works with Next.js App Router and Pages Router.
 </p>
 
 ---
 
-## Neden SharePoint Kit?
+## Why SharePoint Kit?
 
-SharePoint’e Graph API üzerinden bağlanırken tip güvenliği, tekrarlayan kod ve auth karmaşıklığı sorunlarını çözmek için tasarlandı. Tek bir pakette:
+Built to solve type safety, boilerplate, and auth complexity when connecting to SharePoint via the Graph API. Everything in one package:
 
-- **Graph API client** – retry, throttle desteğiyle CRUD işlemleri  
-- **React hooks** – SWR tabanlı `useSpList`, `useSpItem`, `useSpCreate` vb.  
-- **Radix UI bileşenleri** – hazır `<SpListTable>`, `<SpItemForm>`, `<SpItemCard>`  
-- **CLI type generator** – SharePoint content type’lardan otomatik TypeScript tipleri üretimi  
-- **Config tabanlı** – Her proje kendi `sharepoint.config.ts` yapısını tanımlar  
+- **Graph API client** – CRUD with retry and throttle handling
+- **React hooks** – SWR-based `useSpList`, `useSpItem`, `useSpCreate`, and more
+- **Radix UI components** – Ready-to-use `<SpListTable>`, `<SpItemForm>`, `<SpItemCard>`
+- **CLI type generator** – Generate TypeScript types from SharePoint content types
+- **Config-driven** – Each project defines its SharePoint structure in `sharepoint.config.ts`
 
 ---
 
-## Kurulum
+## Installation
 
 ```bash
 npm install @mustafaaksoy41/sharepoint-kit
 ```
 
-### Peer bağımlılıklar
+### Peer dependencies
 
 ```bash
 npm install react react-dom swr @radix-ui/themes @radix-ui/react-icons
@@ -51,11 +51,11 @@ npm install react react-dom swr @radix-ui/themes @radix-ui/react-icons
 
 ---
 
-## Hızlı Başlangıç
+## Quick Start
 
-### 1. SharePoint’ten TypeScript tipleri üret
+### 1. Generate TypeScript types from SharePoint
 
-Proje kökünde `sharepoint.config.ts` oluştur:
+Create `sharepoint.config.ts` in your project root:
 
 ```typescript
 export default {
@@ -65,36 +65,36 @@ export default {
   defaultStrategy: 'interactive',
   contentTypes: [
     {
-      listName: 'Faturalar',
-      contentTypeName: 'Fatura Denemesi',
+      listName: 'Invoices',
+      contentTypeName: 'Invoice',
       outputType: 'Invoice',
     },
     {
-      contentTypeName: 'Belge',
+      contentTypeName: 'Document',
       outputType: 'Document',
     },
   ],
   options: {
     outputDir: './generated',
     fieldNameMapping: {
-      'Fatura_x0020_Numaras_x0131_': 'faturaNo',
+      'Invoice_x0020_Number': 'invoiceNo',
     },
   },
 };
 ```
 
-CLI’ı çalıştır:
+Run the CLI:
 
 ```bash
 npx sp-generate-types --config sharepoint.config.ts
 ```
 
-`./generated/sp-types.ts` üretilir:
+This generates `./generated/sp-types.ts`:
 
 ```typescript
 export interface Invoice {
-  faturaNo?: string;
-  Tutar?: number;
+  invoiceNo?: string;
+  Amount?: number;
   Title?: string;
 }
 
@@ -103,7 +103,7 @@ export interface Document {
 }
 ```
 
-### 2. Data client kullan
+### 2. Use the data client
 
 ```typescript
 import { createSpClient } from '@mustafaaksoy41/sharepoint-kit';
@@ -114,19 +114,19 @@ const client = createSpClient({
   getAccessToken: async () => yourTokenFunction(),
 });
 
-// CRUD - tip güvenli
+// CRUD with full type safety
 const items = await client.getListItems<Invoice>({
   listId: '50fc630f-...',
-  contentTypeName: 'Fatura Denemesi',
+  contentTypeName: 'Invoice',
 });
 
 const item = await client.getItem<Invoice>({ listId: '...', itemId: '6' });
-const created = await client.createItem<Invoice>({ listId: '...', fields: { Tutar: 500 } });
-const updated = await client.updateItem<Invoice>({ listId: '...', itemId: '6', fields: { Tutar: 600 } });
+const created = await client.createItem<Invoice>({ listId: '...', fields: { Amount: 500 } });
+const updated = await client.updateItem<Invoice>({ listId: '...', itemId: '6', fields: { Amount: 600 } });
 await client.deleteItem({ listId: '...', itemId: '6' });
 ```
 
-### 3. React hooks kullan
+### 3. Use React hooks
 
 ```tsx
 import { SpProvider } from '@mustafaaksoy41/sharepoint-kit/components';
@@ -144,23 +144,23 @@ function App() {
 function InvoiceList() {
   const { data, isLoading, error } = useSpList<Invoice>({
     listId: '50fc630f-...',
-    contentTypeName: 'Fatura Denemesi',
+    contentTypeName: 'Invoice',
   });
 
-  if (isLoading) return <p>Yükleniyor...</p>;
-  if (error) return <p>Hata: {error.message}</p>;
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   return (
     <ul>
       {data?.map((item) => (
-        <li key={item.id}>{item.fields.Title} - {item.fields.Tutar}</li>
+        <li key={item.id}>{item.fields.Title} - {item.fields.Amount}</li>
       ))}
     </ul>
   );
 }
 ```
 
-### 4. Radix UI bileşenleri
+### 4. Radix UI components
 
 ```tsx
 import { SpProvider, SpListTable, SpItemForm, SpErrorBoundary } from '@mustafaaksoy41/sharepoint-kit/components';
@@ -172,10 +172,10 @@ function App() {
       <SpErrorBoundary onAuthError={() => router.push('/login')}>
         <SpListTable<Invoice>
           listId="50fc630f-..."
-          contentTypeName="Fatura Denemesi"
+          contentTypeName="Invoice"
           columns={[
-            { key: 'faturaNo', label: 'Fatura No' },
-            { key: 'Tutar', label: 'Tutar', format: 'currency' },
+            { key: 'invoiceNo', label: 'Invoice No' },
+            { key: 'Amount', label: 'Amount', format: 'currency' },
           ]}
           onRowClick={(item, id) => router.push(`/invoices/${id}`)}
         />
@@ -187,13 +187,13 @@ function App() {
 
 ---
 
-## Kimlik Doğrulama
+## Authentication
 
-**Microsoft Login** (önerilen) veya **manuel token / bypass** kullanılabilir.
+You can use **Microsoft Login** (recommended) or **manual token / bypass**.
 
 ### Microsoft Login
 
-`.env` dosyasına ekle (tarayıcıdan okunabilmesi için `NEXT_PUBLIC_` ile):
+Add to your `.env` (use `NEXT_PUBLIC_` so the browser can read them):
 
 ```env
 NEXT_PUBLIC_SHAREPOINT_TENANT_ID=your-tenant-id
@@ -201,9 +201,9 @@ NEXT_PUBLIC_SHAREPOINT_CLIENT_ID=your-client-id
 NEXT_PUBLIC_SHAREPOINT_REDIRECT_URI=http://localhost:3000
 ```
 
-Azure AD: App Registration → Authentication → bu Redirect URI ile **SPA** ekle. API izinleri: **Sites.Read.All** (Delegated).
+In Azure AD: App Registration → Authentication → add **SPA** with this Redirect URI. API permissions: **Sites.Read.All** (Delegated).
 
-Uygulamayı `SpAuthProvider` + `loginConfig` ile sarmala:
+Wrap your app with `SpAuthProvider` and `loginConfig`:
 
 ```tsx
 import { SpAuthProvider, SpProviderWithAuth, type SpLoginConfig } from '@mustafaaksoy41/sharepoint-kit/components';
@@ -218,76 +218,76 @@ const loginConfig: SpLoginConfig = {
 <Theme>
   <SpAuthProvider loginConfig={loginConfig}>
     <SpProviderWithAuth siteId="root">
-      {/* Uygulama */}
+      {/* Your app */}
     </SpProviderWithAuth>
   </SpAuthProvider>
 </Theme>
 ```
 
-Kullanıcı “Sign in with Microsoft” ile giriş yapar; token saklanır ve Graph API isteklerinde kullanılır.
+Users sign in with "Sign in with Microsoft"; the token is stored and used for Graph API calls.
 
-### Manuel token veya bypass (geliştirme)
+### Manual token or bypass (development)
 
 ```tsx
 <SpAuthProvider bypassEnabled={true}>
   <SpProviderWithAuth siteId="root">
-    {/* Uygulama */}
+    {/* Your app */}
   </SpProviderWithAuth>
 </SpAuthProvider>
 ```
 
 ---
 
-## CLI Kullanımı
+## CLI usage
 
 ```bash
-# İnteraktif mod (varsayılan)
+# Interactive mode (default)
 npx sp-generate-types --config sharepoint.config.ts
 
-# CI/CD için non-interactive
+# Non-interactive for CI/CD
 npx sp-generate-types --config sharepoint.config.ts --non-interactive
 
-# Strateji ile
+# With strategy
 npx sp-generate-types --config sharepoint.config.ts --non-interactive --strategy first
-# Stratejiler: interactive | first | error | all
+# Strategies: interactive | first | error | all
 
-# Önbelleği temizle
+# Clear cache
 npx sp-generate-types --config sharepoint.config.ts --clear-cache
 ```
 
-### Config alanları
+### Config options
 
-| Alan | Tip | Zorunlu | Açıklama |
-|------|-----|---------|----------|
-| `siteId` | `string` | Evet | SharePoint site ID |
-| `tenantId` | `string` | Evet | Azure AD tenant ID |
-| `clientId` | `string` | Evet | Azure AD app client ID |
-| `defaultStrategy` | `string` | Hayır | Varsayılan liste seçim stratejisi |
-| `contentTypes` | `array` | Evet | Tipleri üretilecek content type’lar |
-| `options.outputDir` | `string` | Hayır | Çıktı klasörü (varsayılan: `./generated`) |
-| `options.fieldNameMapping` | `object` | Hayır | SharePoint alan adı → TS property mapping |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `siteId` | `string` | Yes | SharePoint site ID |
+| `tenantId` | `string` | Yes | Azure AD tenant ID |
+| `clientId` | `string` | Yes | Azure AD app client ID |
+| `defaultStrategy` | `string` | No | Default list selection strategy |
+| `contentTypes` | `array` | Yes | Content types to generate |
+| `options.outputDir` | `string` | No | Output directory (default: `./generated`) |
+| `options.fieldNameMapping` | `object` | No | SharePoint field name → TS property mapping |
 
 ### Content type config
 
-| Alan | Tip | Zorunlu | Açıklama |
-|------|-----|---------|----------|
-| `contentTypeName` | `string` | Evet | Content type adı |
-| `outputType` | `string` | Evet | Üretilecek TypeScript interface adı |
-| `listId` | `string` | Hayır | Liste ID (opsiyonel) |
-| `listName` | `string` | Hayır | Liste görünen adı (opsiyonel) |
-| `strategy` | `string` | Hayır | Bu content type için strateji override |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `contentTypeName` | `string` | Yes | Content type name |
+| `outputType` | `string` | Yes | TypeScript interface name to generate |
+| `listId` | `string` | No | SharePoint list ID (optional) |
+| `listName` | `string` | No | List display name (optional) |
+| `strategy` | `string` | No | Override strategy for this content type |
 
-### Liste çözümleme mantığı
+### List resolution logic
 
-1. `listId` verilmişse doğrudan kullanılır  
-2. `listName` verilmişse ada göre liste bulunur  
-3. İkisi de yoksa tüm listeler taranır:
-   - Tek listede bulunursa o kullanılır  
-   - Birden fazla listede bulunursa interaktif modda kullanıcıya sorulur, değilse strateji uygulanır  
+1. If `listId` is provided, use it directly
+2. If `listName` is provided, find the list by name
+3. If neither is provided, scan all lists for the content type:
+   - If found in one list, use it
+   - If found in multiple lists, prompt the user (interactive) or apply the strategy
 
 ---
 
-## Hata yönetimi
+## Error handling
 
 ```typescript
 import { SpError, SpAuthError, SpNotFoundError, SpThrottleError, SpValidationError } from '@mustafaaksoy41/sharepoint-kit';
@@ -296,14 +296,14 @@ try {
   await client.getItem({ listId, itemId: '999' });
 } catch (error) {
   if (error instanceof SpAuthError) {
-    // 401/403 - login'e yönlendir
+    // 401/403 - redirect to login
   } else if (error instanceof SpNotFoundError) {
-    // 404 - kayıt bulunamadı
+    // 404 - item not found
   } else if (error instanceof SpThrottleError) {
-    // 429 - retryAfter mevcut
-    console.log(`Şu kadar saniye sonra tekrar dene: ${error.retryAfter}`);
+    // 429 - retryAfter available
+    console.log(`Retry after ${error.retryAfter} seconds`);
   } else if (error instanceof SpValidationError) {
-    // 400 - doğrulama hataları
+    // 400 - validation errors
     console.log(error.fieldErrors);
   }
 }
@@ -311,9 +311,9 @@ try {
 
 ---
 
-## Tip eşlemesi
+## Type mapping
 
-| SharePoint tipi | TypeScript tipi |
+| SharePoint Type | TypeScript Type |
 |-----------------|-----------------|
 | Text, Note, Choice | `string` |
 | MultiChoice | `string[]` |
@@ -326,6 +326,6 @@ try {
 
 ---
 
-## Lisans
+## License
 
 MIT
