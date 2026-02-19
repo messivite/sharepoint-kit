@@ -108,25 +108,9 @@ For CI/CD (non-interactive):
 npx sp-generate-types -c sharepoint.config.ts --non-interactive
 ```
 
-Terminal output:
+#### Demo Terminal
 
-```
-SharePoint Kit - Type Generator
-
-Site: root
-Strategy: interactive
-Output: ./generated/sp-types.ts
-
-Scanning SharePoint site...
-
-Processing: "Fatura Denemesi" -> Invoice
-  Found list "Belgeler" (50fc630f-3495-4fc1-81e4-dfa7ef915574)
-Processing: "Belge" -> Document
-  Scanning lists for content type "Belge"...
-  Found content type "Belge" in list "Belgeler"
-  Generating interface "Invoice" from list "Belgeler"...
-  Generating interface "Document" from list "Belgeler"...
-```
+![SharePoint Kit type generator CLI output](assets/terminal-output.png)
 
 This generates `./generated/sp-types.ts`:
 
