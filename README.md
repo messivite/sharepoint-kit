@@ -1,8 +1,16 @@
 <p align="center">
-  <img src="https://img.shields.io/npm/v/@mustafaaksoy41/sharepoint-kit?style=for-the-badge&logo=npm" alt="npm version" />
-  <img src="https://img.shields.io/npm/dt/@mustafaaksoy41/sharepoint-kit?style=for-the-badge" alt="downloads" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="license" />
+  <a href="https://www.npmjs.com/package/@mustafaaksoy41/sharepoint-kit">
+    <img src="https://img.shields.io/npm/v/@mustafaaksoy41/sharepoint-kit?style=for-the-badge&logo=npm" alt="npm version" />
+  </a>
+  <a href="https://www.npmjs.com/package/@mustafaaksoy41/sharepoint-kit">
+    <img src="https://img.shields.io/npm/dt/@mustafaaksoy41/sharepoint-kit?style=for-the-badge" alt="downloads" />
+  </a>
+  <a href="https://www.typescriptlang.org/">
+    <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  </a>
+  <a href="https://github.com/messivite/sharepoint-kit/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="license" />
+  </a>
 </p>
 
 <h1 align="center">SharePoint Kit</h1>
