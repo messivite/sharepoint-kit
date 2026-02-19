@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-
+import 'dotenv/config';
 import { Command } from 'commander';
 import { generateTypes } from '../src/cli/generate-types.js';
 import type { ListSelectionStrategy } from '../src/cli/config-loader.js';

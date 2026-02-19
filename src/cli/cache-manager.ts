@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
 
 export interface CacheResolution {
   listId: string;
@@ -44,6 +44,10 @@ export class CacheManager {
   }
 
   save(data: CacheData): void {
+    const dir = dirname(this.cachePath);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
     writeFileSync(this.cachePath, JSON.stringify(data, null, 2), 'utf-8');
   }
 

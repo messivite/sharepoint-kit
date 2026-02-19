@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve, extname } from 'path';
+import { createJiti } from 'jiti';
 
 export type ListSelectionStrategy = 'interactive' | 'first' | 'error' | 'all';
 
@@ -48,11 +49,15 @@ export async function loadConfig(configPath: string): Promise<SpKitConfig> {
   if (ext === '.json') {
     const content = readFileSync(absolutePath, 'utf-8');
     config = JSON.parse(content) as SpKitConfig;
-  } else if (ext === '.ts' || ext === '.js' || ext === '.mjs') {
+  } else if (ext === '.ts' || ext === '.tsx') {
+    const jiti = createJiti(import.meta.url);
+    const mod = await jiti.import(absolutePath, { default: true });
+    config = mod as SpKitConfig;
+  } else if (ext === '.js' || ext === '.mjs') {
     const module = await import(absolutePath);
     config = module.default ?? module;
   } else {
-    throw new Error(`Unsupported config file format: ${ext}. Use .json, .ts, .js, or .mjs`);
+    throw new Error(`Unsupported config file format: ${ext}. Use .json, .ts, .tsx, .js, or .mjs`);
   }
 
   validateConfig(config);

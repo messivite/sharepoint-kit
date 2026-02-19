@@ -53,48 +53,88 @@ npm install react react-dom swr @radix-ui/themes @radix-ui/react-icons
 
 ## Quick Start
 
-### 1. Generate TypeScript types from SharePoint
+### 1. Environment variables
 
-Create `sharepoint.config.ts` in your project root:
+Create a `.env` file in your project root (the CLI loads it automatically via dotenv):
+
+```env
+SHAREPOINT_SITE_ID=root
+SHAREPOINT_TENANT_ID=your-tenant-id
+SHAREPOINT_CLIENT_ID=your-client-id
+SHAREPOINT_CLIENT_SECRET=your-client-secret
+```
+
+### 2. Config file
+
+Create `sharepoint.config.ts` (or `sharepoint.config.json`):
 
 ```typescript
 export default {
-  siteId: 'root',
+  siteId: process.env.SHAREPOINT_SITE_ID || 'root',
   tenantId: process.env.SHAREPOINT_TENANT_ID,
   clientId: process.env.SHAREPOINT_CLIENT_ID,
+  clientSecret: process.env.SHAREPOINT_CLIENT_SECRET,
   defaultStrategy: 'interactive',
   contentTypes: [
     {
-      listName: 'Invoices',
-      contentTypeName: 'Invoice',
+      listId: '50fc630f-3495-4fc1-81e4-dfa7ef915574',  // use listId for document libraries
+      contentTypeName: 'Fatura Denemesi',
       outputType: 'Invoice',
     },
     {
-      contentTypeName: 'Document',
+      contentTypeName: 'Belge',
       outputType: 'Document',
     },
   ],
   options: {
     outputDir: './generated',
     fieldNameMapping: {
-      'Invoice_x0020_Number': 'invoiceNo',
+      'Fatura_x0020_Numaras_x0131_': 'faturaNo',
+      'M_x00fc__x015f_teri_x0020_No': 'musteriNo',
     },
   },
 };
 ```
 
-Run the CLI:
+### 3. Run the type generator
 
 ```bash
-npx sp-generate-types --config sharepoint.config.ts
+npx sp-generate-types -c sharepoint.config.ts
+```
+
+For CI/CD (non-interactive):
+
+```bash
+npx sp-generate-types -c sharepoint.config.ts --non-interactive
+```
+
+Terminal output:
+
+```
+SharePoint Kit - Type Generator
+
+Site: root
+Strategy: interactive
+Output: ./generated/sp-types.ts
+
+Scanning SharePoint site...
+
+Processing: "Fatura Denemesi" -> Invoice
+  Found list "Belgeler" (50fc630f-3495-4fc1-81e4-dfa7ef915574)
+Processing: "Belge" -> Document
+  Scanning lists for content type "Belge"...
+  Found content type "Belge" in list "Belgeler"
+  Generating interface "Invoice" from list "Belgeler"...
+  Generating interface "Document" from list "Belgeler"...
 ```
 
 This generates `./generated/sp-types.ts`:
 
 ```typescript
 export interface Invoice {
-  invoiceNo?: string;
-  Amount?: number;
+  faturaNo?: string;
+  musteriNo?: string;
+  Tutar?: number;
   Title?: string;
 }
 
@@ -103,7 +143,35 @@ export interface Document {
 }
 ```
 
-### 2. Use the data client
+### 4. Why `fieldNameMapping`?
+
+SharePoint returns column **InternalNames** in an encoded format. Spaces and special characters become hex codes:
+
+| Display name | InternalName (from Graph API) |
+|--------------|------------------------------|
+| Fatura Numarası | `Fatura_x0020_Numaras_x0131_` |
+| Müşteri No | `M_x00fc__x015f_teri_x0020_No` |
+
+Without mapping, you'd get ugly property names in TypeScript. The mapping converts them to camelCase:
+
+```typescript
+fieldNameMapping: {
+  'Fatura_x0020_Numaras_x0131_': 'faturaNo',
+  'M_x00fc__x015f_teri_x0020_No': 'musteriNo',
+}
+```
+
+**Important:** The mapping key must match the InternalName exactly (including typos like `Np` vs `No`). Check the generated file or Graph API response if a field isn't being mapped.
+
+### 5. `listId` vs `listName`
+
+For document libraries (e.g. Shared Documents / Belgeler), **`listId` is more reliable**. The Graph API `getLists()` result can vary by tenant or locale. If you know the list ID from the URL (`/sites/root/lists/{list-id}/items`), use it directly:
+
+```typescript
+{ listId: '50fc630f-3495-4fc1-81e4-dfa7ef915574', contentTypeName: 'Fatura Denemesi', outputType: 'Invoice' }
+```
+
+### 6. Use the data client
 
 ```typescript
 import { createSpClient } from '@mustafaaksoy41/sharepoint-kit';
@@ -126,7 +194,7 @@ const updated = await client.updateItem<Invoice>({ listId: '...', itemId: '6', f
 await client.deleteItem({ listId: '...', itemId: '6' });
 ```
 
-### 3. Use React hooks
+### 7. Use React hooks
 
 ```tsx
 import { SpProvider } from '@mustafaaksoy41/sharepoint-kit/components';
@@ -160,7 +228,7 @@ function InvoiceList() {
 }
 ```
 
-### 4. Radix UI components
+### 8. Radix UI components
 
 ```tsx
 import { SpProvider, SpListTable, SpItemForm, SpErrorBoundary } from '@mustafaaksoy41/sharepoint-kit/components';
@@ -285,6 +353,15 @@ npx sp-generate-types --config sharepoint.config.ts --clear-cache
    - If found in one list, use it
    - If found in multiple lists, prompt the user (interactive) or apply the strategy
 
+### What the CLI does (under the hood)
+
+1. Loads config and fetches an access token (client credentials flow)
+2. Resolves each content type to a list (by `listId`, `listName`, or scanning)
+3. Calls Graph API: `getListContentTypes`, `getColumns` / `getListColumns`
+4. Maps column types from Graph's format (`text`, `number`, `currency` etc.) to TypeScript
+5. Applies `fieldNameMapping` to rename encoded InternalNames to camelCase
+6. Writes `sp-types.ts` to the output directory
+
 ---
 
 ## Error handling
@@ -313,16 +390,18 @@ try {
 
 ## Type mapping
 
-| SharePoint Type | TypeScript Type |
-|-----------------|-----------------|
-| Text, Note, Choice | `string` |
-| MultiChoice | `string[]` |
-| Number, Currency | `number` |
-| Boolean | `boolean` |
-| DateTime | `string` (ISO) |
-| Lookup | `{ id: number; value: string }` |
-| User | `{ id: number; email: string; displayName: string }` |
-| URL | `{ url: string; description: string }` |
+The Microsoft Graph API returns column definitions with properties like `text`, `number`, `currency` rather than a single `type` string. These map to TypeScript as follows:
+
+| Graph API / SharePoint Type | TypeScript Type |
+|-----------------------------|-----------------|
+| text, text (multiline), choice | `string` |
+| multiSelect | `string[]` |
+| number, currency | `number` |
+| boolean | `boolean` |
+| dateTime | `string` (ISO) |
+| lookup | `{ id: number; value: string }` |
+| personOrGroup | `{ id: number; email: string; displayName: string }` |
+| url | `{ url: string; description: string }` |
 
 ---
 

@@ -12,3 +12,10 @@ coverage/
 .env.development
 .env.production
 .env.test
+
+# Project-specific config (copy from sharepoint.config.example.ts)
+sharepoint.config.ts
+sharepoint.config.json
+
+# Generated output
+generated/

@@ -1,5 +1,8 @@
 import type { SpKitConfig } from './src/cli/config-loader.js';
 
+// Copy this file to sharepoint.config.ts and fill in your values.
+// Required env vars: SHAREPOINT_TENANT_ID, SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET
+
 const config: SpKitConfig = {
   siteId: process.env.SHAREPOINT_SITE_ID || 'root',
   tenantId: process.env.SHAREPOINT_TENANT_ID,
@@ -8,20 +11,16 @@ const config: SpKitConfig = {
   defaultStrategy: 'interactive',
   contentTypes: [
     {
-      listName: 'Faturalar',
-      contentTypeName: 'Fatura Denemesi',
+      listId: 'your-list-id', // or listName: 'Your List Display Name'
+      contentTypeName: 'Your Content Type Name',
       outputType: 'Invoice',
-    },
-    {
-      contentTypeName: 'Belge',
-      outputType: 'Document',
     },
   ],
   options: {
     outputDir: './generated',
     fieldNameMapping: {
-      'Fatura_x0020_Numaras_x0131_': 'faturaNo',
-      'M_x00fc__x015f_teri_x0020_No': 'musteriNo',
+      // SharePoint InternalName -> camelCase property name
+      // e.g. 'Column_x0020_Name': 'columnName',
     },
   },
 };
