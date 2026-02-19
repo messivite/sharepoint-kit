@@ -83,7 +83,7 @@ export async function resolveContentType(
         });
       }
     } catch {
-      // Skip lists with access errors
+      // okuma yetkimiz olmayan listeleri geç
     }
   }
 

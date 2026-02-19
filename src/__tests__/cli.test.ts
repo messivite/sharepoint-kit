@@ -97,7 +97,7 @@ describe('templates', () => {
 });
 
 describe('CacheManager', () => {
-  // CacheManager tests use file system so skipped for unit tests
+  // CacheManager dosya sistemi kullanıyor, unit testlerde atla
   it.todo('should load and save cache');
   it.todo('should return null for non-existent cache');
   it.todo('should save and retrieve resolutions');

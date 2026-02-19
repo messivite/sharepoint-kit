@@ -3,7 +3,7 @@ import { SpProvider, type SpProviderProps } from './sp-provider.js';
 import { useSpAuth } from './sp-auth-provider.js';
 
 export interface SpProviderWithAuthProps extends Omit<SpProviderProps, 'getAccessToken'> {
-  // bypassEnabled is handled by SpAuthProvider, not here
+  // bypass SpAuthProvider'dan geliyor
 }
 
 /**

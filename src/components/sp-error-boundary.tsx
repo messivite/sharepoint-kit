@@ -31,7 +31,7 @@ export class SpErrorBoundary extends Component<SpErrorBoundaryProps, SpErrorBoun
     if (onAuthError) {
       onAuthError();
     } else {
-      // Default: logout and show login screen
+      // onAuthError yoksa token'ı sil ve sayfayı yenile
       if (typeof window !== 'undefined') {
         localStorage.removeItem('sp-kit-token');
         window.location.reload();

@@ -95,7 +95,7 @@ export function SpAuthProvider({
     }
   }, [manualToken, login]);
 
-  // On load: handle redirect return from Microsoft login (only when loginConfig is set)
+  // Microsoft OAuth redirect sonrası token'ı al
   useEffect(() => {
     if (!loginConfig || redirectCheckDone.current || typeof window === 'undefined') return;
     redirectCheckDone.current = true;
