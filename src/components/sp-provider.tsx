@@ -2,6 +2,17 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { createSpClient } from '../client/sp-client.js';
 import type { SpClientConfig } from '../client/types.js';
 
+// --- REACT 18 POLYFILL FOR SPFX (React 17) ---
+// Framer Motion ve Radix UI'ın eski React sürümlerinde çökmesini engeller.
+if (typeof window !== 'undefined' && typeof (React as any).useInsertionEffect === 'undefined') {
+  (React as any).useInsertionEffect = React.useLayoutEffect || React.useEffect;
+}
+if (typeof window !== 'undefined' && typeof (React as any).useId === 'undefined') {
+  let _idCounter = Math.floor(Math.random() * 10000);
+  (React as any).useId = () => {
+    return 'sp-kit-id-' + Math.random().toString(36).substring(2, 7) + '-' + (_idCounter++);
+  };
+}
 type SpClientInstance = ReturnType<typeof createSpClient>;
 
 interface SpContextValue {
