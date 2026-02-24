@@ -20,6 +20,12 @@ export interface ContentTypeConfig {
   strategy?: ListSelectionStrategy;
 }
 
+export interface ListConfig {
+  listId?: string;
+  listName?: string;
+  outputType: string;
+}
+
 export interface SpKitConfig {
   siteId: string;
   tenantId?: string;
@@ -28,7 +34,8 @@ export interface SpKitConfig {
   /** Microsoft login config for browser (SPA). Optional; when set, enables "Sign in with Microsoft". */
   login?: SpLoginConfig;
   defaultStrategy?: ListSelectionStrategy;
-  contentTypes: ContentTypeConfig[];
+  contentTypes?: ContentTypeConfig[];
+  lists?: ListConfig[];
   options?: {
     outputDir?: string;
     outputFile?: string;
@@ -75,14 +82,18 @@ function validateConfig(config: unknown): asserts config is SpKitConfig {
     throw new Error('Config must have a "siteId" string property');
   }
 
-  if (!Array.isArray(c.contentTypes) || c.contentTypes.length === 0) {
-    throw new Error('Config must have a non-empty "contentTypes" array');
+  const hasContentTypes = Array.isArray(c.contentTypes) && c.contentTypes.length > 0;
+  const hasLists = Array.isArray(c.lists) && c.lists.length > 0;
+
+  if (!hasContentTypes && !hasLists) {
+    throw new Error('Config must have a non-empty "contentTypes" or "lists" array');
   }
 
-  for (const [index, ct] of (c.contentTypes as unknown[]).entries()) {
-    if (!ct || typeof ct !== 'object') {
-      throw new Error(`contentTypes[${index}] must be an object`);
-    }
+  if (hasContentTypes) {
+    for (const [index, ct] of (c.contentTypes as unknown[]).entries()) {
+      if (!ct || typeof ct !== 'object') {
+        throw new Error(`contentTypes[${index}] must be an object`);
+      }
 
     const ctObj = ct as Record<string, unknown>;
 
@@ -107,6 +118,33 @@ function validateConfig(config: unknown): asserts config is SpKitConfig {
       throw new Error(`contentTypes[${index}].strategy must be one of: ${validStrategies.join(', ')}`);
     }
   }
+}
+
+if (hasLists) {
+  for (const [index, list] of (c.lists as unknown[]).entries()) {
+    if (!list || typeof list !== 'object') {
+      throw new Error(`lists[${index}] must be an object`);
+    }
+
+    const listObj = list as Record<string, unknown>;
+
+    if (!listObj.outputType || typeof listObj.outputType !== 'string') {
+      throw new Error(`lists[${index}] must have an "outputType" string property`);
+    }
+
+    if (listObj.listId === undefined && listObj.listName === undefined) {
+      throw new Error(`lists[${index}] must have either a "listId" or "listName" array`);
+    }
+
+    if (listObj.listId !== undefined && typeof listObj.listId !== 'string') {
+      throw new Error(`lists[${index}].listId must be a string`);
+    }
+
+    if (listObj.listName !== undefined && typeof listObj.listName !== 'string') {
+      throw new Error(`lists[${index}].listName must be a string`);
+    }
+  }
+}
 
   if (c.defaultStrategy !== undefined) {
     const validStrategies: ListSelectionStrategy[] = ['interactive', 'first', 'error', 'all'];

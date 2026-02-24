@@ -1,9 +1,9 @@
-import type { ContentTypeConfig, ListSelectionStrategy } from './config-loader.js';
+import type { ContentTypeConfig, ListConfig, ListSelectionStrategy } from './config-loader.js';
 import type { CacheManager } from './cache-manager.js';
 import { promptListSelection, type ListInfo } from './interactive-prompt.js';
 
 export interface ResolvedContentType {
-  contentTypeName: string;
+  contentTypeName?: string;
   outputType: string;
   listId: string;
   listName: string;
@@ -142,4 +142,41 @@ export async function resolveContentType(
     listId: list.listId,
     listName: list.listName,
   }));
+}
+
+export async function resolveList(
+  config: ListConfig,
+  siteId: string,
+  graphClient: GraphClient,
+): Promise<ResolvedContentType[]> {
+  if (config.listId) {
+    const list = await graphClient.getList({ listId: config.listId });
+    console.log(`  Found list "${list.displayName}" (${list.id})`);
+    return [{
+      outputType: config.outputType,
+      listId: config.listId,
+      listName: list.displayName,
+    }];
+  }
+
+  if (config.listName) {
+    const lists = await graphClient.getLists();
+    const list = lists.find(
+      (l) => l.displayName === config.listName || l.name === config.listName,
+    );
+
+    if (!list) {
+      throw new Error(`List "${config.listName}" not found in site "${siteId}"`);
+    }
+
+    console.log(`  Found list "${list.displayName}" (${list.id})`);
+
+    return [{
+      outputType: config.outputType,
+      listId: list.id,
+      listName: list.displayName,
+    }];
+  }
+  
+  throw new Error('ListConfig must have either a listId or a listName');
 }

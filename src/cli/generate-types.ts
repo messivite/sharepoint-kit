@@ -3,7 +3,7 @@ import { dirname, resolve } from 'path';
 import { ConfidentialClientApplication } from '@azure/msal-node';
 import { loadConfig, type SpKitConfig, type ListSelectionStrategy } from './config-loader.js';
 import { CacheManager } from './cache-manager.js';
-import { resolveContentType, type ResolvedContentType } from './list-resolver.js';
+import { resolveContentType, resolveList, type ResolvedContentType } from './list-resolver.js';
 import { generateTypeScript } from './type-generator.js';
 import { createSpClient } from '../client/sp-client.js';
 
@@ -48,25 +48,50 @@ export async function generateTypes(options: GenerateTypesOptions): Promise<void
 
   const allResolved: ResolvedContentType[] = [];
 
-  for (const ctConfig of config.contentTypes) {
-    console.log(`Processing: "${ctConfig.contentTypeName}" -> ${ctConfig.outputType}`);
+  if (config.contentTypes) {
+    for (const ctConfig of config.contentTypes) {
+      console.log(`Processing Content Type: "${ctConfig.contentTypeName}" -> ${ctConfig.outputType}`);
 
-    try {
-      const resolved = await resolveContentType(
-        ctConfig,
-        config.siteId,
-        client,
-        cacheManager,
-        globalStrategy,
-        nonInteractive,
-      );
-      allResolved.push(...resolved);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`  Error: ${message}`);
+      try {
+        const resolved = await resolveContentType(
+          ctConfig,
+          config.siteId,
+          client,
+          cacheManager,
+          globalStrategy,
+          nonInteractive,
+        );
+        allResolved.push(...resolved);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`  Error: ${message}`);
 
-      if (nonInteractive) {
-        throw error;
+        if (nonInteractive) {
+          throw error;
+        }
+      }
+    }
+  }
+
+  if (config.lists) {
+    for (const listConfig of config.lists) {
+      const displayName = listConfig.listName || listConfig.listId;
+      console.log(`Processing List: "${displayName}" -> ${listConfig.outputType}`);
+
+      try {
+        const resolved = await resolveList(
+          listConfig,
+          config.siteId,
+          client,
+        );
+        allResolved.push(...resolved);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`  Error: ${message}`);
+
+        if (nonInteractive) {
+          throw error;
+        }
       }
     }
   }

@@ -86,6 +86,16 @@ export default {
       outputType: 'Document',
     },
   ],
+  lists: [
+    {
+      listId: '12345678-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      outputType: 'Employee',
+    },
+    {
+      listName: 'Depo Stok Durumu',
+      outputType: 'InventoryItem',
+    }
+  ],
   options: {
     outputDir: './generated',
     fieldNameMapping: {
@@ -159,17 +169,22 @@ For document libraries (e.g. Shared Documents / Belgeler), **`listId` is more re
 
 ```typescript
 import { createSpClient } from '@mustafaaksoy41/sharepoint-kit';
-import type { Invoice } from './generated/sp-types';
+import type { Invoice, Employee } from './generated/sp-types';
 
 const client = createSpClient({
   siteId: 'root',
   getAccessToken: async () => yourTokenFunction(),
 });
 
-// CRUD with full type safety
+// CRUD with full type safety (via Content Type)
 const items = await client.getListItems<Invoice>({
   listId: '50fc630f-...',
   contentTypeName: 'Invoice',
+});
+
+// CRUD with full type safety (via Direct List)
+const employees = await client.getListItems<Employee>({
+  listId: '12345678-...',
 });
 
 const item = await client.getItem<Invoice>({ listId: '...', itemId: '6' });
@@ -315,11 +330,12 @@ npx sp-generate-types --config sharepoint.config.ts --clear-cache
 | `tenantId` | `string` | Yes | Azure AD tenant ID |
 | `clientId` | `string` | Yes | Azure AD app client ID |
 | `defaultStrategy` | `string` | No | Default list selection strategy |
-| `contentTypes` | `array` | Yes | Content types to generate |
+| `contentTypes` | `array` | No* | Content types to generate (*either `contentTypes` or `lists` must be provided) |
+| `lists` | `array` | No* | Direct lists to generate (*either `contentTypes` or `lists` must be provided) |
 | `options.outputDir` | `string` | No | Output directory (default: `./generated`) |
 | `options.fieldNameMapping` | `object` | No | SharePoint field name → TS property mapping |
 
-### Content type config
+### Content type config (`contentTypes`)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -329,22 +345,36 @@ npx sp-generate-types --config sharepoint.config.ts --clear-cache
 | `listName` | `string` | No | List display name (optional) |
 | `strategy` | `string` | No | Override strategy for this content type |
 
+### Direct list config (`lists`)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `outputType` | `string` | Yes | TypeScript interface name to generate |
+| `listId` | `string` | No* | SharePoint list ID (*either `listId` or `listName` is required) |
+| `listName` | `string` | No* | List display name (*either `listId` or `listName` is required) |
+
 ### List resolution logic
 
+**For Content Types:**
 1. If `listId` is provided, use it directly
 2. If `listName` is provided, find the list by name
 3. If neither is provided, scan all lists for the content type:
    - If found in one list, use it
    - If found in multiple lists, prompt the user (interactive) or apply the strategy
 
+**For Direct Lists:**
+1. If `listId` is provided, use it directly
+2. If `listName` is provided, find the list by name
+
 ### What the CLI does (under the hood)
 
 1. Loads config and fetches an access token (client credentials flow)
-2. Resolves each content type to a list (by `listId`, `listName`, or scanning)
-3. Calls Graph API: `getListContentTypes`, `getColumns` / `getListColumns`
-4. Maps column types from Graph's format (`text`, `number`, `currency` etc.) to TypeScript
-5. Applies `fieldNameMapping` to rename encoded InternalNames to camelCase
-6. Writes `sp-types.ts` to the output directory
+2. Parses both `contentTypes` and `lists` arrays
+3. Resolves each item to a list (by `listId`, `listName`, or scanning)
+4. Calls Graph API: `getListContentTypes` (for content types), `getColumns` / `getListColumns`
+5. Maps column types from Graph's format (`text`, `number`, `currency` etc.) to TypeScript
+6. Applies `fieldNameMapping` to rename encoded InternalNames to camelCase
+7. Writes `sp-types.ts` to the output directory
 
 ---
 

@@ -9,7 +9,7 @@ interface GraphClient {
 }
 
 export interface TypeGenerationInput {
-  contentTypeName: string;
+  contentTypeName?: string;
   outputType: string;
   listId: string;
   listName: string;
@@ -30,23 +30,28 @@ export async function generateTypeScript(
   for (const input of inputs) {
     console.log(`  Generating interface "${input.outputType}" from list "${input.listName}"...`);
 
-    const contentTypes = await graphClient.getListContentTypes({ listId: input.listId });
-    const contentType = contentTypes.find((ct) => ct.name === input.contentTypeName);
-
     let columns: SpColumn[];
 
-    if (contentType) {
-      try {
-        columns = await graphClient.getColumns({
-          contentTypeId: contentType.id,
-          listId: input.listId,
-        });
-      } catch {
-        console.log(`    Content type columns API failed, falling back to list columns`);
+    if (input.contentTypeName) {
+      const contentTypes = await graphClient.getListContentTypes({ listId: input.listId });
+      const contentType = contentTypes.find((ct) => ct.name === input.contentTypeName);
+
+      if (contentType) {
+        try {
+          columns = await graphClient.getColumns({
+            contentTypeId: contentType.id,
+            listId: input.listId,
+          });
+        } catch {
+          console.log(`    Content type columns API failed, falling back to list columns`);
+          columns = await graphClient.getListColumns({ listId: input.listId });
+        }
+      } else {
+        console.log(`    Content type not found, falling back to list columns`);
         columns = await graphClient.getListColumns({ listId: input.listId });
       }
     } else {
-      console.log(`    Content type not found, falling back to list columns`);
+      console.log(`    Fetching list columns directly (no content type specified)`);
       columns = await graphClient.getListColumns({ listId: input.listId });
     }
 
