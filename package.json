@@ -51,7 +51,10 @@
         "types": "./dist/cli/index.d.cts",
         "default": "./dist/cli/index.cjs"
       }
-    }
+    },
+    "./dist/components": "./dist/components/index.js",
+    "./dist/components/index": "./dist/components/index.js",
+    "./dist/components/index.js": "./dist/components/index.js"
   },
   "files": [
     "dist",
